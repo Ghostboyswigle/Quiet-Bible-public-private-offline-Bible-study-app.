@@ -26,8 +26,8 @@ Everything here was last built and tested for **v1.4.2** (version code 142, targ
 | `third_party/` | Exact source of sherpa-onnx v1.13.8, the eSpeak NG commit it compiles in (GPL-3.0) and piper-phonemize. |
 | `original-source/v0.5/` | The v0.5 React/TypeScript source the app started from (see "Editing the page" and its README). |
 
-The finished downloads (APK, translation packs, voice packs, voice samples) are published as
-GitHub releases.
+The finished downloads (APK, translation packs, voice packs, voice samples) are published in
+the public repository's `Downloads/` folder.
 
 ## Build
 
@@ -71,7 +71,8 @@ mis-assembles `const/high16`, so write float constants as plain `const` in smali
    For a before/after check run `e2e/snap.js` on both builds and compare the shots with
    `e2e/cmpshots.py`. Some of these scripts point at a scratch folder for unpacked
    translation packs; change `S` at the top.
-6. Publish the APK, with the translation and voice packs, as a GitHub release.
+6. Put the APK, and any changed translation or voice packs, in `Downloads/`, and update
+   `Downloads/READ ME.txt`.
 
 ## Editing the page
 
