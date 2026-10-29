@@ -26,9 +26,13 @@ the Bible, your notes and the voices all stay on your phone.
 
 ## Download and install
 
-Download the APK from this repository's **Releases** page and open it on your phone. Translation
-and voice packs are in the same release: add them in Settings > Translation and Settings > Voice.
-Some voices come in two parts; add both.
+1. Open [`Downloads/QuietBible-v1.4.2.apk`](Downloads/QuietBible-v1.4.2.apk) on your phone and tap
+   the download button (Android 8 or later). Open the file to install it.
+2. Optional: translation and voice packs are in [`Downloads/`](Downloads). Add them in
+   Settings > Translation and Settings > Voice. The Supertonic voices come in two parts; add both.
+
+[`Downloads/READ ME.txt`](Downloads/READ%20ME.txt) lists every pack, and
+[`Downloads/Voice samples/`](Downloads/Voice%20samples) has a short recording of each voice.
 
 ## Build it yourself
 

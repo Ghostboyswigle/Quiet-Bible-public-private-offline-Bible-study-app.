@@ -1,0 +1,50 @@
+QUIET BIBLE v1.4.2
+==================
+
+A private, offline Bible reader for Android that reads aloud. No account, no ads, no tracking,
+and no internet permission. Needs Android 8 or later. The app is about 74 MB.
+
+1. Install the app
+   Open QuietBible-v1.4.2.apk on your phone and install it (you may need to allow installs
+   from your browser or file manager). It installs over any earlier official Quiet Bible and
+   keeps your notes. Built in: the King James Version (the main text), the Berean Standard
+   Bible, and the English voice "John".
+
+2. Add translations if you want them (Settings > Translation > "Add a translation from a file")
+   Translations/
+     QuietBible-RV1909.qbbible    Spanish     Reina-Valera 1909
+     QuietBible-CUV.qbbible       Chinese     Chinese Union Version (Traditional)
+     QuietBible-CUVS.qbbible      Chinese     Chinese Union Version (Simplified)
+     QuietBible-ADB.qbbible       Tagalog     Ang Dating Biblia (1905)
+     QuietBible-VIE1934.qbbible   Vietnamese  Kinh Thanh 1934 (Ban Truyen Thong)
+     QuietBible-LSG.qbbible       French      Louis Segond 1910
+     QuietBible-SVD.qbbible       Arabic      Smith & Van Dyck (reads right to left)
+     QuietBible-BLIVRE.qbbible    Portuguese  Biblia Livre (Almeida)
+     QuietBible-RST.qbbible       Russian     Synodal
+
+3. Add voices if you want them (Settings > Voice > "Add a voice from a file")
+   Voices/English
+       Kristin (female), Norman (male)
+   Voices/Spanish, French, Portuguese, Russian, Vietnamese, Arabic
+       The Supertonic voices come as TWO files, part1 and part2. Add both: you can pick
+       them together in the file picker, or one after the other. Together they give each
+       language a female and a male voice:
+         Spanish Lucia, Mateo     French Claire, Louis     Portuguese Ana, Joao
+         Russian Anna, Ivan       Vietnamese Lan, Minh     Arabic Nour, Omar
+   Chinese and Tagalog are read by the phone's own voice.
+   Voice samples/ has a short recording of each voice.
+
+4. Things to try
+   - Tap a verse, then look under "Study": Hebrew/Greek words, cross-references, commentary
+     and a Bible dictionary.
+   - Tap "Map" at the top: the cross-reference map (Bible Cross-References by Oleksii
+     Trekhleb). The back gesture closes it.
+   - Library > Research: older texts some readers ask about, each with a description.
+
+5. Licences
+   Quiet Bible is free software under the GNU GPL, version 3 or later; its source is this
+   repository. Three research books (Books 1 and 4 of Rodkinson's Talmud, and de Manhar's
+   Zohar) are for non-commercial use only and are not covered by the GPL. The Supertonic
+   voices are under the OpenRAIL-M licence (inside the voice files and shown in the app):
+   anyone may use and share them, but not for the harmful uses it lists. Every credit and
+   licence is in the app: Settings > About > Credits and licences.
