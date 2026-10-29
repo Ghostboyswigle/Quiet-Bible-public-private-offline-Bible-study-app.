@@ -1,0 +1,1 @@
+# Quiet-Bible-public-private-offline-Bible-study-app.
