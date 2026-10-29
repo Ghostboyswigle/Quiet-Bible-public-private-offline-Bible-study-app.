@@ -1,0 +1,628 @@
+diff --git a/src/app/Explorer.tsx b/src/app/Explorer.tsx
+index fddfd1c..b9c4ce0 100644
+--- a/src/app/Explorer.tsx
++++ b/src/app/Explorer.tsx
+@@ -37,6 +37,8 @@ import { getLocale } from '../i18n/registry.ts';
+ import { localeManifestFileName } from '../i18n/locale-path.ts';
+ import { useLocalization } from '../i18n/use-locale.tsx';
+ import { VIEWS, type View } from './views.ts';
++import { BackIcon, ReaderIcon } from '../shared/ui/icons.tsx';
++import { closeMap, readInQuietBible } from './qb-host.ts';
+ 
+ const [HOME] = VIEWS;
+ 
+@@ -209,6 +211,16 @@ export function Explorer({ core }: { readonly core: VizCore }) {
+ 
+   const masthead = (
+     <>
++      {/* Quiet Bible: back to the app. */}
++      <button
++        type="button"
++        className={controls.button}
++        aria-label={t('qb.back')}
++        title={t('qb.back')}
++        onClick={closeMap}
++      >
++        <BackIcon />
++      </button>
+       <h1 className={styles.title}>
+         <InAppLink
+           href={hrefOf(HOME, null)}
+@@ -296,8 +308,20 @@ export function Explorer({ core }: { readonly core: VizCore }) {
+                 import.meta.env.SITE_URL,
+               ).href
+             }
+-            passageLinks={(target) =>
+-              VIEWS.filter((other) => other !== view).map((other) => (
++            passageLinks={(target) => [
++              // Quiet Bible: the passage in the app's own reader.
++              <button
++                key="qb-read"
++                type="button"
++                className={controls.button}
++                onClick={() => {
++                  readInQuietBible(target, versification, location.translation);
++                }}
++              >
++                <ReaderIcon />
++                {t('qb.read')}
++              </button>,
++              ...VIEWS.filter((other) => other !== view).map((other) => (
+                 <InAppLink
+                   key={other.id}
+                   href={hrefOf(other, target)}
+@@ -309,8 +333,8 @@ export function Explorer({ core }: { readonly core: VizCore }) {
+                   <other.icon />
+                   {t(other.openLabelKey)}
+                 </InAppLink>
+-              ))
+-            }
++              )),
++            ]}
+           />
+         </ErrorBoundary>
+       </div>
+diff --git a/src/app/explorer-location.ts b/src/app/explorer-location.ts
+index a0ca926..4aec55c 100644
+--- a/src/app/explorer-location.ts
++++ b/src/app/explorer-location.ts
+@@ -20,6 +20,12 @@ const PASSAGE_PARAM = 'ref';
+ const VOTES_PARAM = 'votes';
+ /** Hidden genres, comma-separated, e.g. `hide=law,history`. */
+ const HIDE_PARAM = 'hide';
++/**
++ * Quiet Bible: the view, e.g. `view=threads`. Inside the app the map is one file on the phone, and
++ * a page loaded from a file may change its address's query but not its path, so the view moves
++ * from the path into the query there. Links to the public site keep the path.
++ */
++const VIEW_PARAM = 'view';
+ 
+ /** A page of the explorer: which view it shows, and where. */
+ export interface ViewRoute<Id extends string> {
+@@ -83,7 +89,8 @@ export function parseExplorerUrl<Id extends string>(
+   defaultLocale: LocaleId,
+ ): ExplorerLocation<Id> {
+   const { locale: pathLocale, rest } = splitLocalePath(url.pathname, base);
+-  const path = normalizePath(rest);
++  const viewParam = url.searchParams.get(VIEW_PARAM);
++  const path = viewParam === null ? normalizePath(rest) : normalizePath(viewParam);
+   const route = routes.find((candidate) => candidate.path === path) ?? routes[0];
+   const id = url.searchParams.get(PASSAGE_PARAM);
+   // The path wins over `?lang=`, because the file served at that path is already in that
+@@ -150,6 +157,12 @@ export function explorerUrl(
+   // to — see `plainLocaleFor`.
+   const localeSegment = localePathSegment(locale);
+   const params = new URLSearchParams();
++  // Quiet Bible: an address inside the app (any base but the public site's empty one) stays on
++  // this file and names its view in the query.
++  const inApp = base !== '';
++  if (inApp && route.path !== '') {
++    params.set(VIEW_PARAM, route.path.replace(/\/$/, ''));
++  }
+   if (passage !== null) {
+     params.set(PASSAGE_PARAM, toPassageOsisId(passage, versification));
+   }
+@@ -168,6 +181,9 @@ export function explorerUrl(
+   }
+   // Commas are fine in a query and far more readable than %2C.
+   const query = params.toString().replaceAll('%2C', ',');
++  if (inApp) {
++    return `${window.location.pathname}${query === '' ? '' : `?${query}`}`;
++  }
+   return `${base}${localeSegment}${route.path}${query === '' ? '' : `?${query}`}`;
+ }
+ 
+diff --git a/src/app/qb-host.ts b/src/app/qb-host.ts
+new file mode 100644
+index 0000000..97aca1f
+--- /dev/null
++++ b/src/app/qb-host.ts
+@@ -0,0 +1,26 @@
++import { toPassageOsisId, type Passage } from '../core/bible/passage.ts';
++import type { Versification } from '../core/bible/versification.ts';
++import type { TranslationId } from '../core/datasets/ids.ts';
++
++/**
++ * Quiet Bible: the map runs in a frame inside the Quiet Bible app and talks to it by message.
++ * `qb-map-close` closes the map; `qb-map-read` opens a passage in Quiet Bible's reader. The app
++ * checks that a message came from its own frame before acting on it.
++ */
++function tell(message: Record<string, string>): void {
++  if (window.parent !== window) {
++    window.parent.postMessage(message, '*');
++  }
++}
++
++export function closeMap(): void {
++  tell({ type: 'qb-map-close' });
++}
++
++export function readInQuietBible(
++  passage: Passage,
++  versification: Versification,
++  translation: TranslationId,
++): void {
++  tell({ type: 'qb-map-read', ref: toPassageOsisId(passage, versification), translation });
++}
+diff --git a/src/app/use-explorer-location.ts b/src/app/use-explorer-location.ts
+index 46b8db1..960be89 100644
+--- a/src/app/use-explorer-location.ts
++++ b/src/app/use-explorer-location.ts
+@@ -88,12 +88,11 @@ export function useExplorerLocation<Id extends string>(
+         plainTranslationFor(defaultTranslation(defaultLocale)),
+         plainLocaleFor(defaultLocale),
+       );
++      // Quiet Bible: the frame never adds history entries of its own, so Back (the phone's
++      // gesture) always closes the map and returns to the reader.
++      void replace;
+       if (url !== `${window.location.pathname}${window.location.search}`) {
+-        if (replace) {
+-          window.history.replaceState(null, '', url);
+-        } else {
+-          window.history.pushState(null, '', url);
+-        }
++        window.history.replaceState(null, '', url);
+       }
+     },
+     [routes, versification, defaultTranslation, defaultLocale],
+diff --git a/src/core/datasets/ids.ts b/src/core/datasets/ids.ts
+index 2e4c6c4..7388035 100644
+--- a/src/core/datasets/ids.ts
++++ b/src/core/datasets/ids.ts
+@@ -5,14 +5,8 @@
+  * dataset has, for example, both a data-pipeline importer and a runtime manifest.
+  */
+ 
+-export const TRANSLATION_IDS = [
+-  'bsb',
+-  'kjv',
+-  'blivre',
+-  'luther1912',
+-  'riveduta1927',
+-  'vbl',
+-] as const;
++// Quiet Bible: only the two English texts the app carries, the KJV first.
++export const TRANSLATION_IDS = ['kjv', 'bsb'] as const;
+ export type TranslationId = (typeof TRANSLATION_IDS)[number];
+ 
+ export const CROSS_REFERENCE_SOURCE_IDS = ['openbible'] as const;
+diff --git a/src/i18n/locale-id.ts b/src/i18n/locale-id.ts
+index 4a35d40..c3cc838 100644
+--- a/src/i18n/locale-id.ts
++++ b/src/i18n/locale-id.ts
+@@ -11,7 +11,8 @@
+  * São Paulo, and filing them under `pt-BR` would leave European readers on English for the sake
+  * of a handful of words.
+  */
+-export const LOCALE_IDS = ['en', 'pt', 'de', 'it', 'es', 'uk'] as const;
++// Quiet Bible: English only.
++export const LOCALE_IDS = ['en'] as const;
+ export type LocaleId = (typeof LOCALE_IDS)[number];
+ 
+ /** Whether a string from outside (a URL, a stored preference) names a locale. */
+diff --git a/src/i18n/messages/en.ts b/src/i18n/messages/en.ts
+index 8f7b66f..79be5af 100644
+--- a/src/i18n/messages/en.ts
++++ b/src/i18n/messages/en.ts
+@@ -12,6 +12,8 @@ export const en = {
+   'app.name': 'Bible Cross-References',
+   // Shown instead of the full name where the header has no room for it.
+   'app.name.short': 'Cross-References',
++  'qb.back': 'Back to Quiet Bible',
++  'qb.read': 'Open in Quiet Bible',
+ 
+   'view.arcs': 'Arcs',
+   'view.arcs.short': 'Arcs',
+@@ -61,8 +63,8 @@ export const en = {
+ 
+   'attribution.bsb': 'Scripture text: Berean Standard Bible (BSB), dedicated to the public domain.',
+   'attribution.kjv':
+-    'Scripture text: King James Version (Authorized Version), the 1769 text. Public domain in ' +
+-    'the United States and most of the world; in the United Kingdom, letters patent reserve ' +
++    'Scripture text: King James Version (Authorized Version), the 1769 text, as in Quiet Bible. ' +
++    'Public domain in the United States and most of the world; in the United Kingdom, letters patent reserve ' +
+     'the right to print it to the Crown’s patentees — Cambridge University Press, Oxford ' +
+     'University Press and Collins.',
+   'attribution.blivre':
+diff --git a/src/i18n/registry.ts b/src/i18n/registry.ts
+index de40f8a..0ccce6b 100644
+--- a/src/i18n/registry.ts
++++ b/src/i18n/registry.ts
+@@ -1,30 +1,10 @@
+ import type { GenreId } from '../core/bible/genres.ts';
+ import { enBooks } from './books/en.ts';
+-import { ptBooks } from './books/pt.ts';
+-import { deBooks } from './books/de.ts';
+-import { itBooks } from './books/it.ts';
+-import { esBooks } from './books/es.ts';
+-import { ukBooks } from './books/uk.ts';
+ import type { BookNames } from './books/types.ts';
+ import { enGenres } from './genres/en.ts';
+ import { enInstall } from './install/en.tsx';
+-import { ptInstall } from './install/pt.tsx';
+-import { deInstall } from './install/de.tsx';
+-import { itInstall } from './install/it.tsx';
+-import { esInstall } from './install/es.tsx';
+-import { ukInstall } from './install/uk.tsx';
+ import type { InstallGuides } from './install/types.ts';
+-import { ptGenres } from './genres/pt.ts';
+-import { deGenres } from './genres/de.ts';
+-import { itGenres } from './genres/it.ts';
+-import { esGenres } from './genres/es.ts';
+-import { ukGenres } from './genres/uk.ts';
+ import { en } from './messages/en.ts';
+-import { pt } from './messages/pt.ts';
+-import { de } from './messages/de.ts';
+-import { it } from './messages/it.ts';
+-import { es } from './messages/es.ts';
+-import { uk } from './messages/uk.ts';
+ import type { LocaleMessages } from './messages/types.ts';
+ import { DEFAULT_LOCALE_ID, type LocaleId } from './locale-id.ts';
+ import { LOCALE_TAGS } from './locale-tags.ts';
+@@ -41,6 +21,7 @@ export interface Locale {
+   readonly install: InstallGuides;
+ }
+ 
++// Quiet Bible: English only (the app's own language).
+ const LOCALES: Readonly<Record<LocaleId, Locale>> = {
+   en: {
+     id: 'en',
+@@ -50,46 +31,6 @@ const LOCALES: Readonly<Record<LocaleId, Locale>> = {
+     genres: enGenres,
+     install: enInstall,
+   },
+-  pt: {
+-    id: 'pt',
+-    ...LOCALE_TAGS.pt,
+-    messages: pt,
+-    books: ptBooks,
+-    genres: ptGenres,
+-    install: ptInstall,
+-  },
+-  de: {
+-    id: 'de',
+-    ...LOCALE_TAGS.de,
+-    messages: de,
+-    books: deBooks,
+-    genres: deGenres,
+-    install: deInstall,
+-  },
+-  it: {
+-    id: 'it',
+-    ...LOCALE_TAGS.it,
+-    messages: it,
+-    books: itBooks,
+-    genres: itGenres,
+-    install: itInstall,
+-  },
+-  es: {
+-    id: 'es',
+-    ...LOCALE_TAGS.es,
+-    messages: es,
+-    books: esBooks,
+-    genres: esGenres,
+-    install: esInstall,
+-  },
+-  uk: {
+-    id: 'uk',
+-    ...LOCALE_TAGS.uk,
+-    messages: uk,
+-    books: ukBooks,
+-    genres: ukGenres,
+-    install: ukInstall,
+-  },
+ };
+ 
+ export { DEFAULT_LOCALE_ID };
+diff --git a/src/shared/lib/mount.tsx b/src/shared/lib/mount.tsx
+index c15100a..5507103 100644
+--- a/src/shared/lib/mount.tsx
++++ b/src/shared/lib/mount.tsx
+@@ -1,22 +1,15 @@
+ import { StrictMode, type ReactNode } from 'react';
+ import { createRoot } from 'react-dom/client';
+-import { InstallGuideDialog } from '../ui/InstallGuide.tsx';
+ import '../styles/global.css';
+ 
+ /**
+- * Renders a page's root component into `#root`, beside the one thing every page shares that is
+- * not part of any of them: the install guide, which the footers open and which lives out here so
+- * that a page with several views (each with a footer of its own) still has exactly one.
++ * Renders a page's root component into `#root`. Quiet Bible: without the install guide, since the
++ * map is part of an installed app already.
+  */
+ export function mount(page: ReactNode): void {
+   const container = document.getElementById('root');
+   if (!container) {
+     throw new Error('Root element #root not found.');
+   }
+-  createRoot(container).render(
+-    <StrictMode>
+-      {page}
+-      <InstallGuideDialog />
+-    </StrictMode>,
+-  );
++  createRoot(container).render(<StrictMode>{page}</StrictMode>);
+ }
+diff --git a/src/shared/ui/SiteFooter.tsx b/src/shared/ui/SiteFooter.tsx
+index 9ae0655..d7a05f3 100644
+--- a/src/shared/ui/SiteFooter.tsx
++++ b/src/shared/ui/SiteFooter.tsx
+@@ -1,14 +1,6 @@
+ import type { ReactNode } from 'react';
+-import { useLocalization } from '../../i18n/use-locale.tsx';
+-import { SourceCodeIcon } from './icons.tsx';
+-import { InstallLink } from './InstallGuide.tsx';
+ import styles from './SiteFooter.module.css';
+ 
+-const YEAR = new Date().getFullYear();
+-
+-/** Where the code lives. The project is open source, so every page points at it. */
+-const REPOSITORY_URL = 'https://github.com/trekhleb/bible-cross-references';
+-
+ interface SiteFooterProps {
+   /** Page-specific credits, such as data attribution. */
+   readonly children?: ReactNode;
+@@ -17,29 +9,14 @@ interface SiteFooterProps {
+ }
+ 
+ /**
+- * The minimal site-wide footer: the year, the author's site, the source and how to install the
+- * app, plus credits.
++ * Quiet Bible: the footer names the project and its author; the app has no internet access, so
++ * there are no links to the site, the source or an install guide. Quiet Bible's About screen
++ * carries the full credits and the MIT licence.
+  */
+ export function SiteFooter({ children, className }: SiteFooterProps) {
+-  const { t } = useLocalization();
+   return (
+     <footer className={className ? `${styles.footer} ${className}` : styles.footer}>
+-      <span className={styles.owner}>
+-        <span className={styles.copyright}>© {YEAR} · </span>
+-        <a href="https://trekhleb.dev">trekhleb.dev</a> ·{' '}
+-        <a
+-          className={styles.source}
+-          href={REPOSITORY_URL}
+-          target="_blank"
+-          rel="noreferrer"
+-          title={t('footer.source')}
+-          aria-label={t('footer.source')}
+-        >
+-          <SourceCodeIcon />
+-          <span className={styles.sourceLabel}>{t('footer.sourceLabel')}</span>
+-        </a>{' '}
+-        <InstallLink />
+-      </span>
++      <span className={styles.owner}>Bible Cross-References by Oleksii Trekhleb (MIT)</span>
+       {children !== undefined && <span className={styles.credits}>{children}</span>}
+     </footer>
+   );
+diff --git a/src/shared/ui/icons.tsx b/src/shared/ui/icons.tsx
+index f640955..ab93e81 100644
+--- a/src/shared/ui/icons.tsx
++++ b/src/shared/ui/icons.tsx
+@@ -5,6 +5,7 @@ import {
+   LuArrowLeft,
+   LuArrowRight,
+   LuArrowRightLeft,
++  LuBookOpen,
+   LuBookOpenText,
+   LuCheck,
+   LuChevronDown,
+@@ -66,6 +67,9 @@ export const PreviousIcon = decorative(LuChevronLeft);
+ export const NextIcon = decorative(LuChevronRight);
+ export const ExpandIcon = decorative(LuChevronDown);
+ export const CloseIcon = decorative(LuX);
++// Quiet Bible: back to the app, and a passage opened in its reader.
++export const BackIcon = decorative(LuArrowLeft);
++export const ReaderIcon = decorative(LuBookOpen);
+ 
+ // Actions
+ export const SearchIcon = decorative(LuSearch);
+diff --git a/src/translations/registry.ts b/src/translations/registry.ts
+index b9ac772..ef46e31 100644
+--- a/src/translations/registry.ts
++++ b/src/translations/registry.ts
+@@ -1,19 +1,9 @@
+ import type { TranslationId } from '../core/datasets/ids.ts';
+ import type { TranslationManifest } from './translation-manifest.ts';
+ 
++// Quiet Bible: the app's own two English texts, the King James Version first. Both are the text
++// Quiet Bible reads (its built-in KJV and its built-in BSB), so the map and the reader agree.
+ const TRANSLATIONS: Readonly<Record<TranslationId, TranslationManifest>> = {
+-  bsb: {
+-    id: 'bsb',
+-    name: 'Berean Standard Bible',
+-    abbreviation: 'BSB',
+-    language: 'en',
+-    direction: 'ltr',
+-    versification: 'kjv',
+-    license: { name: 'Public domain', url: 'https://berean.bible/terms.htm', publicDomain: true },
+-    attribution: 'Scripture text: Berean Standard Bible (BSB), dedicated to the public domain.',
+-    homepage: 'https://berean.bible/',
+-    access: 'bundled',
+-  },
+   kjv: {
+     id: 'kjv',
+     name: 'King James Version',
+@@ -26,107 +16,24 @@ const TRANSLATIONS: Readonly<Record<TranslationId, TranslationManifest>> = {
+       url: 'https://ebible.org/Scriptures/details.php?id=eng-kjv2006',
+       publicDomain: true,
+     },
+-    // The United Kingdom is the exception to "public domain", and the app says so wherever the
+-    // translation is chosen: rights there are a perpetual royal patent, not an expiring copyright.
+     attribution:
+-      'Scripture text: King James Version (Authorized Version), the 1769 text. Public domain in ' +
+-      'the United States and most of the world; in the United Kingdom, letters patent reserve ' +
+-      'the right to print it to the Crown’s patentees — Cambridge University Press, Oxford ' +
+-      'University Press and Collins.',
++      'Scripture text: King James Version (Authorized Version), the 1769 text, as in Quiet Bible. ' +
++      'Public domain in the United States and most of the world; in the United Kingdom, letters ' +
++      'patent reserve the right to print it to the Crown’s patentees — Cambridge University ' +
++      'Press, Oxford University Press and Collins.',
+     homepage: 'https://ebible.org/Scriptures/details.php?id=eng-kjv2006',
+     access: 'bundled',
+   },
+-  blivre: {
+-    id: 'blivre',
+-    name: 'Bíblia Livre',
+-    abbreviation: 'BLIVRE',
+-    language: 'pt-BR',
+-    direction: 'ltr',
+-    versification: 'kjv',
+-    license: {
+-      name: 'CC BY 3.0 BR',
+-      url: 'https://creativecommons.org/licenses/by/3.0/br/',
+-    },
+-    // CC BY asks for the authors, the licence, the URI the licensor designated and a note
+-    // that the material was changed. The edition date is included because the translators
+-    // ask for it: the work is ongoing.
+-    attribution:
+-      'Scripture text: Bíblia Livre (BLIVRE), © Diego Santos, Mario Sérgio and Marco Teles, ' +
+-      'February 2018 (Textus Receptus edition), https://sites.google.com/site/biblialivre/. ' +
+-      'Changed: whitespace was normalized; no word was altered.',
+-    homepage: 'https://sites.google.com/site/biblialivre/',
+-    access: 'bundled',
+-  },
+-  luther1912: {
+-    id: 'luther1912',
+-    name: 'Lutherbibel 1912',
+-    // The three letters German Bible software has used for this text for decades. The year is
+-    // carried by the name and the id, because `LUT` alone would equally name the 1545, the 1984
+-    // and the 2017 — and only one of those is free to publish.
+-    abbreviation: 'LUT',
+-    language: 'de',
+-    direction: 'ltr',
+-    versification: 'kjv',
+-    license: {
+-      name: 'Public domain',
+-      url: 'https://ebible.org/Scriptures/details.php?id=deu1912',
+-      publicDomain: true,
+-    },
+-    attribution:
+-      'Scripture text: Lutherbibel 1912 (LUT), the 1912 revision of Martin Luther’s German ' +
+-      'translation. Public domain. Changed: the edition’s own verse numbers were taken out of ' +
+-      '358 verses and a corrupt token out of Judges 11:25; no word was altered.',
+-    homepage: 'https://ebible.org/Scriptures/details.php?id=deu1912',
+-    access: 'bundled',
+-  },
+-  riveduta1927: {
+-    id: 'riveduta1927',
+-    name: 'Riveduta 1927',
+-    abbreviation: 'RIV',
+-    language: 'it',
+-    direction: 'ltr',
+-    versification: 'kjv',
+-    license: {
+-      name: 'Public domain',
+-      url: 'https://ebible.org/Scriptures/details.php?id=ita1927',
+-      publicDomain: true,
+-    },
+-    // "under", not "of": Luzzi chaired the revision commission rather than translating it alone,
+-    // and he separately finished a translation of his own, so "the translation of Giovanni Luzzi"
+-    // would name a different book. The year is here because it is the only thing separating this
+-    // from the Nuova Riveduta, a 1994 revision that is still in copyright.
+-    attribution:
+-      'Scripture text: Riveduta 1927 (RIV), the Italian revision made under Giovanni Luzzi. ' +
+-      'Public domain. Changed: the edition’s own verse numbers were taken out of 228 verses, ' +
+-      'a running head out of three and a stray character out of 2 Samuel 20:26; no word was ' +
+-      'altered.',
+-    homepage: 'https://ebible.org/Scriptures/details.php?id=ita1927',
+-    access: 'bundled',
+-  },
+-  vbl: {
+-    id: 'vbl',
+-    name: 'Versión Biblia Libre',
+-    // No year, where the other two carry one: a year is there to separate a text from a revision
+-    // that is not free (Luther 1984 and 2017, the Nuova Riveduta). Nothing is confusable with
+-    // this one, and it is a living translation rather than a fixed edition.
+-    abbreviation: 'VBL',
+-    language: 'es',
++  bsb: {
++    id: 'bsb',
++    name: 'Berean Standard Bible',
++    abbreviation: 'BSB',
++    language: 'en',
+     direction: 'ltr',
+     versification: 'kjv',
+-    license: {
+-      name: 'CC BY-SA 4.0',
+-      url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+-    },
+-    // CC BY-SA asks for the authors, the licence, a link to it and a note that the material was
+-    // changed. The one change is a space, which §2(a)(4) puts outside "Adapted Material"
+-    // altogether — but it is recorded anyway, because a credit that lists what was done to a
+-    // text is worth more than one that lists only what the licence compels.
+-    attribution:
+-      'Scripture text: Versión Biblia Libre (VBL), © 2018–2020 Jonathan Gallagher y Shelly ' +
+-      'Barrios de Avila, with Gustavo Sanabria and Rebekah Põldaas, ' +
+-      'https://ebible.org/Scriptures/details.php?id=spavbl, licensed under CC BY-SA 4.0. ' +
+-      'Changed: a space before a colon was moved in one verse; no word was altered.',
+-    homepage: 'https://ebible.org/Scriptures/details.php?id=spavbl',
++    license: { name: 'Public domain', url: 'https://berean.bible/terms.htm', publicDomain: true },
++    attribution: 'Scripture text: Berean Standard Bible (BSB), dedicated to the public domain.',
++    homepage: 'https://berean.bible/',
+     access: 'bundled',
+   },
+ };
+@@ -135,7 +42,7 @@ const TRANSLATIONS: Readonly<Record<TranslationId, TranslationManifest>> = {
+ export const TRANSLATION_MANIFESTS: readonly TranslationManifest[] = Object.values(TRANSLATIONS);
+ 
+ /** The translation shown when the user has not picked one. */
+-export const DEFAULT_TRANSLATION_ID: TranslationId = 'bsb';
++export const DEFAULT_TRANSLATION_ID: TranslationId = 'kjv';
+ 
+ export function getTranslationManifest(id: TranslationId): TranslationManifest {
+   return TRANSLATIONS[id];
+diff --git a/src/visualizations/arcs/axis-painter.ts b/src/visualizations/arcs/axis-painter.ts
+index 59c702b..0d79108 100644
+--- a/src/visualizations/arcs/axis-painter.ts
++++ b/src/visualizations/arcs/axis-painter.ts
+@@ -4,7 +4,7 @@ import type { GenreId } from '../../core/bible/genres.ts';
+ import type { VerseIndexRange, Versification } from '../../core/bible/versification.ts';
+ import type { BookNames } from '../../i18n/books/types.ts';
+ import { elementAt } from '../../core/lib/array.ts';
+-import { GENRE_HEX } from '../shared/palette.ts';
++import { GENRE_HEX, themeHex } from '../shared/palette.ts';
+ import { verseToAlong, type ArcLayout } from './arc-layout.ts';
+ import type { AxisView } from './axis-view.ts';
+ 
+@@ -21,9 +21,10 @@ export interface AxisPaint {
+   readonly passage: VerseIndexRange | null;
+ }
+ 
+-const TEXT = '#ecebe6';
+-const MUTED = '#9a9890';
+-const AXIS = '#3a3935';
++// Quiet Bible: the app's theme where it set one.
++const TEXT = themeHex('--color-text', '#ecebe6');
++const MUTED = themeHex('--color-text-muted', '#9a9890');
++const AXIS = themeHex('--color-border', '#3a3935');
+ const BAR_OFFSET = 3;
+ const BAR_THICKNESS = 8;
+ const LABEL_FONT = '11px system-ui, -apple-system, "Segoe UI", sans-serif';
+diff --git a/src/visualizations/shared/palette.ts b/src/visualizations/shared/palette.ts
+index 61198b5..041dd14 100644
+--- a/src/visualizations/shared/palette.ts
++++ b/src/visualizations/shared/palette.ts
+@@ -1,7 +1,19 @@
+ import { GENRES, type GenreId } from '../../core/bible/genres.ts';
+ 
++/**
++ * Quiet Bible: a color the page set as a custom property on `<html>` (the app's theme), if it is
++ * a plain `#rrggbb`, or the fallback.
++ */
++export function themeHex(property: string, fallback: string): string {
++  if (typeof document === 'undefined') {
++    return fallback;
++  }
++  const value = document.documentElement.style.getPropertyValue(property).trim();
++  return /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
++}
++
+ /** Background of every visualization (the dark theme's `--color-background`). */
+-export const VIZ_SURFACE = '#0d0d0d';
++export const VIZ_SURFACE = themeHex('--color-background', '#0d0d0d');
+ 
+ /**
+  * Genre colors for the dark surface, in canonical genre order: warm Old Testament, cool New

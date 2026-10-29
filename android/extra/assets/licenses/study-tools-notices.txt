@@ -1,0 +1,59 @@
+Quiet Bible - study tools (Hebrew & Greek words, cross-references, commentary, dictionary)
+=========================================================================================
+
+The study data in assets/www/bible/study/ was built from the sources below by
+study/tools/build_study.py in Quiet Bible's source code. The builder reshapes the data (it
+groups words by verse, counts how the KJV renders each Hebrew and Greek word, lists the
+verses each word appears in, and splits everything into small files). It does not change the
+wording of any definition, note or entry, except that markup and some reference lines are
+removed, and a few notes are attached to the verse they explain.
+
+Hebrew and Greek words behind the King James Version
+  xmlBible.org by Danny Carlton - GNU General Public License, version 3
+  https://github.com/DannyCarlton/xmlBible.org (commit 71c681e, September 2026)
+  Built by its author from:
+    - CrossWire's "KJV (1769) with Strongs Numbers and Morphology" (OSIS edition),
+      https://crosswire.org
+    - STEPBible TAHOT (Translators Amalgamated Hebrew OT) and TAGNT (Translators
+      Amalgamated Greek NT), STEPBible.org, Tyndale House, Cambridge - Creative Commons
+      Attribution 4.0 (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/
+    - The Cambridge Paragraph Bible (Scrivener, 1873), public domain
+
+Strong's Hebrew and Greek dictionaries
+  James Strong, "A Concise Dictionary of the Words in the Hebrew Bible" and "A Concise
+  Dictionary of the Words in the Greek Testament" (1890) - public domain.
+  XML editions by David Troidl and David Instone-Brewer (Hebrew) and Ulrik Sandborg-Petersen
+  (Greek), marked public domain, from Open Scriptures:
+  https://github.com/openscriptures/strongs (commit 0acd2f2)
+
+Meanings ("Meaning" in a word study)
+  TBESH (Translators Brief lexicon of Extended Strongs for Hebrew) and TBESG (... for Greek),
+  STEPBible.org, Tyndale House, Cambridge - CC BY 4.0,
+  https://creativecommons.org/licenses/by/4.0/
+  https://github.com/STEPBible/STEPBible-Data (commit 0f60797, September 2025).
+  Changes: markup removed and verse links turned into plain text.
+
+Cross-references
+  OpenBible.info cross references (2025-10-13 edition), based on the Treasury of Scripture
+  Knowledge (public domain) and ranked by readers' votes - Creative Commons Attribution
+  (CC BY), https://www.openbible.info/labs/cross-references/
+  Changes: references with no positive votes are left out.
+
+Commentaries
+  Matthew Henry, "An Exposition of the Old and New Testament" (1706-1714) - public domain.
+  Robert Jamieson, A. R. Fausset and David Brown, "A Commentary, Critical, Experimental and
+  Practical, on the Old and New Testaments" (1871) - public domain.
+  Text from the HelloAO Free Use Bible API (marked public domain), as collected by Open
+  Christian Data, https://github.com/eve-coda/open-christian-data (data files marked CC0 1.0,
+  commit 3733dcc). Matthew Henry's commentary has no notes on the Song of Solomon in this
+  edition.
+
+Bible dictionaries
+  M. G. Easton, "Illustrated Bible Dictionary" (1897); William Smith, "A Dictionary of the
+  Bible" (1863); Roswell D. Hitchcock, "An Interpreting Dictionary of Scripture Proper Names"
+  (1869) - all public domain. Entries as parsed from the Christian Classics Ethereal Library's
+  editions by the NEUU bible-dictionary-dataset - CC BY 4.0,
+  https://github.com/neuu-org/bible-dictionary-dataset (commit b8e82aa).
+
+The study data as a whole is distributed with Quiet Bible under the GNU General Public
+License, version 3 or later, with the attributions above kept.

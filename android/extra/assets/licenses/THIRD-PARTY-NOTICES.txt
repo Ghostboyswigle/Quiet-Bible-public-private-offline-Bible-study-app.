@@ -1,0 +1,45 @@
+Quiet Bible - notices
+
+Quiet Bible is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. It comes with no warranty. Its source code, and the source of every
+component below, is offered alongside the app wherever the app is offered for
+download.
+
+Offline speech components
+
+sherpa-onnx v1.13.8 (speech engine)
+  Copyright the sherpa-onnx contributors. License: Apache License 2.0
+  https://github.com/k2-fsa/sherpa-onnx (tag v1.13.8)
+
+ONNX Runtime (bundled with sherpa-onnx)
+  Copyright (c) Microsoft Corporation. License: MIT
+  https://github.com/microsoft/onnxruntime
+
+eSpeak NG (pronunciation, compiled into sherpa-onnx; data in tts/espeak-ng-data)
+  License: GNU General Public License v3.0
+  Source: https://github.com/csukuangfj/espeak-ng
+          commit ed530aa113046142eb5115cf2fc9157854d0ffe1
+  Modified by Quiet Bible (October 2026): tts/en_dict-clear-t is eSpeak NG's English
+  dictionary compiled with extra entries (voices/pronunciation/en_listx-clear-t in the
+  app's source), so that the voice Kristin says a clear "t" in "water".
+
+piper-phonemize (compiled into sherpa-onnx). License: MIT
+  https://github.com/csukuangfj/piper-phonemize
+  commit f3ff95afc03640bc1399e113e83361192a2fafb4
+
+Also compiled into sherpa-onnx, each under a permissive licence (Apache 2.0,
+MIT, BSD or MPL 2.0): kaldi-native-fbank, kaldi-decoder, OpenFst,
+simple-sentencepiece, Eigen, hclust-cpp and nlohmann/json. The exact versions
+are named in the cmake folder of sherpa-onnx v1.13.8.
+
+Piper voice "en_US-john-medium" (built in)
+  Piper: MIT License, Copyright (c) 2023 Michael Hansen - https://github.com/rhasspy/piper
+  Voice trained from LibriVox recordings (public domain); see the model card.
+  https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/john/medium
+
+Voices and translations added from files carry their own credits, shown in
+Settings > About > Credits and licences.
+
+The full license texts are beside this notice.

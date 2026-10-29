@@ -1,0 +1,8 @@
+{
+  "name": "fflate",
+  "version": "0.0.0-quiet-bible-shim",
+  "description": "The two functions of fflate that the cross-reference data scripts use (unzipSync, strFromU8), written on Node's zlib so the build needs no download.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT"
+}

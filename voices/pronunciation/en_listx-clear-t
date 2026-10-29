@@ -1,0 +1,8 @@
+// Quiet Bible: a clear "t" in "water" for voices listed in VoiceBridge.CLEAR_T_VOICES.
+// Kristin learned American speech, so she flaps the t in "water" ("wadder") although eSpeak
+// gives her a plain t. Secondary stress on the syllable after the t (",") makes her say it.
+// Only these forms: in compounds and -eth/-est/-ing forms the stress made the word break apart.
+water		w'O:t,3
+waters		w'O:t,3z
+watered		w'O:t,3d
+wateredst	w'O:t,3dst

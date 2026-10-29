@@ -1,0 +1,13 @@
+resources.arsc of android/base/QuietBible-v0.6.0.apk
+
+package 0x7f org.quietbible.app
+  0x7f010000 drawable/quiet_bible_icon [nodpi] = res/drawable-nodpi-v4/quiet_bible_icon.png
+  0x7f020000 style/Theme.QuietBible [(default)] parent=@android:style/Theme.Material.NoActionBar
+      android:windowBackground = #ff141311
+      android:windowActionModeOverlay = true
+      android:fontFamily = sans
+      android:colorAccent = #ffc8a96b
+      android:statusBarColor = #ff141311
+      android:navigationBarColor = #ff141311
+      android:windowLightStatusBar = false
+      android:windowLightNavigationBar = false

@@ -1,0 +1,23 @@
+const { chromium } = require('playwright'); const H = require('./harness');
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await b.newContext({ viewport: { width: 412, height: 915 }, reducedMotion: 'reduce' });
+  await ctx.addInitScript(H.bridges({})); const page = await ctx.newPage();
+  await page.goto('http://127.0.0.1:8765/index.html'); await page.waitForSelector('#v-1');
+  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(250); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(500);
+  await page.evaluate(() => window.__verseMs = 400);
+  await page.click('button[aria-label="Play chapter"]'); await page.waitForTimeout(900);
+  await page.evaluate(() => { document.body.dispatchEvent(new Event('touchmove', { bubbles: true }));
+    const el = document.getElementById('v-1'); let sc = el.parentElement;
+    while (sc && !(sc.scrollHeight > sc.clientHeight && /(auto|scroll)/.test(getComputedStyle(sc).overflowY))) sc = sc.parentElement;
+    sc.scrollTop = sc.scrollHeight; window.__sc = sc; });
+  const at = async () => page.evaluate(() => { const id = window.__spoken[window.__spoken.length-1]; const el = document.getElementById('v-'+id.split('.')[2]);
+    return { id, f: +((el.getBoundingClientRect().top - window.__sc.getBoundingClientRect().top) / window.__sc.clientHeight).toFixed(3) }; });
+  await page.waitForTimeout(3000); const during = await at();
+  await page.waitForTimeout(6500); const later = await at();
+  console.log(`  3s after hand scroll: ${during.id} at ${during.f} (left alone: ${Math.abs(during.f-0.3)>0.05})`);
+  console.log(`  9.5s after:           ${later.id} at ${later.f}`);
+  const ok = Math.abs(during.f - 0.3) > 0.05 && Math.abs(later.f - 0.3) < 0.05;
+  console.log(ok ? '  [PASS] backs off while you scroll, then picks the audio back up on its own' : '  [FAIL]');
+  await b.close(); process.exitCode = ok ? 0 : 1;
+})();

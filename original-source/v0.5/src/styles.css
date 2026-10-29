@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: var(--qb-bg);
+  --color-surface: var(--qb-surface);
+  --color-fg: var(--qb-fg);
+  --color-muted: var(--qb-muted);
+  --color-accent: var(--qb-accent);
+  --color-accent-fg: var(--qb-accent-fg);
+  --color-border: var(--qb-divider);
+  --color-divider: var(--qb-divider);
+  --color-highlight: var(--qb-highlight);
+  --color-jesus: var(--qb-jesus);
+
+  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: Palatino, "Palatino Linotype", "Iowan Old Style", "Book Antiqua", Georgia, serif;
+  --font-scripture: Palatino, "Palatino Linotype", "Iowan Old Style", "Book Antiqua", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-quick: 150ms;
+  --motion-fast: 250ms;
+}
+
+:root {
+  --qb-bg: #141311;
+  --qb-surface: #211f1b;
+  --qb-fg: #f2ebdd;
+  --qb-muted: #b0a79a;
+  --qb-accent: #c8a96b;
+  --qb-accent-fg: #161410;
+  --qb-divider: #423e37;
+  --qb-highlight: #4a3c24;
+  --qb-jesus: #e8c9a0;
+  --shadow-border: 0 0 0 1px color-mix(in oklab, var(--qb-fg) 10%, transparent);
+  --shadow-border-hover: 0 0 0 1px color-mix(in oklab, var(--qb-fg) 18%, transparent);
+  color-scheme: dark;
+}
+
+:root[data-scheme="light"] {
+  color-scheme: light;
+  --shadow-border:
+    0 0 0 1px rgba(40, 32, 20, 0.08),
+    0 1px 2px -1px rgba(40, 32, 20, 0.06);
+  --shadow-border-hover:
+    0 0 0 1px rgba(40, 32, 20, 0.12),
+    0 1px 2px -1px rgba(40, 32, 20, 0.08);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--qb-bg);
+  color: var(--qb-fg);
+  font-family: var(--font-sans);
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

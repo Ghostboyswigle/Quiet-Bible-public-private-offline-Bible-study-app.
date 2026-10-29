@@ -1,0 +1,1 @@
+es|0|Lucía|Female|1.91;es|5|Mateo|Male|2.02;fr|0|Claire|Female|1.84;fr|8|Louis|Male|1.86;pt|1|Ana|Female|2.09;pt|5|João|Male|1.93;ru|0|Anna|Female|1.80;ru|5|Ivan|Male|1.84;vi|2|Lan|Female|1.97;vi|9|Minh|Male|1.86;ar|4|Nour|Female|1.78;ar|9|Omar|Male|1.70

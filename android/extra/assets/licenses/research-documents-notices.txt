@@ -1,0 +1,62 @@
+Quiet Bible - Other research documents (Library > Research)
+==========================================================
+
+The documents in assets/www/bible/docs/ were chosen because the Ben Born Again channel
+(https://www.youtube.com/@1BENBORNAGAIN, https://benbornagain.faith) talks about them. The
+descriptions are Quiet Bible's; "What the channel says" sums up the channel's own view as
+published on its website. Quiet Bible is not affiliated with the channel.
+
+study/tools/build_docs.py in Quiet Bible's source code builds them from the sources below.
+It splits the texts into parts and sections and removes navigation, page numbers, images and
+markup other than italics, bold and note numbers. It does not change the wording.
+
+The Septuagint in English (Brenton)
+  Sir Lancelot C. L. Brenton's translation (1844), public domain, in the LXX2012 edition
+  ("Septuagint in American English 2012", Michael Paul Johnson, eBible.org), public domain.
+  Files from https://github.com/BibleNLP/ebible (tests/versifications/eng-lxx2012).
+
+The Masoretic text (Hebrew)
+  Westminster Leningrad Codex, public domain, as published by the Open Scriptures Hebrew Bible
+  project, https://github.com/openscriptures/morphhb (only the Hebrew text is used; its lemma
+  and morphology data, CC BY 4.0, are not).
+
+The Geneva Bible (1599), the Textus Receptus (1550/1894), the Wycliffe Bible (about 1395)
+  Public domain texts, from CrossWire's SWORD modules as converted by scrollmapper
+  bible_databases, https://github.com/scrollmapper/bible_databases (MIT licence for the
+  conversion).
+
+The Apocrypha of the 1611 King James Bible
+  King James Version with Apocrypha (1769 text), public domain, from scrollmapper
+  bible_databases as collected by Open Christian Data,
+  https://github.com/eve-coda/open-christian-data (data marked public domain).
+
+1 Clement, 2 Clement, the Didache, Barnabas, Ignatius, Polycarp, Diognetus, Hermas,
+Justin Martyr
+  Translations from the Ante-Nicene Fathers (Roberts, Donaldson and others, 1885-1896),
+  public domain, from the Historical Christian Faith Writings Database,
+  https://github.com/HistoricalChristianFaith/Writings-Database ("All works in this repo are
+  in the public domain").
+
+Josephus (William Whiston, 1737), Tacitus, Annals 15.44 (A. J. Church and W. J. Brodribb,
+1876), the Babylonian Talmud (Michael L. Rodkinson, 1896-1903), the Zohar (Nurho de Manhar,
+1900-1914), the Sefer Yetzirah (W. Wynn Westcott, 1887), the Lesser Key of Solomon
+(S. L. MacGregor Mathers and Aleister Crowley, 1904)
+  Public domain texts (in the United States at least), as scanned, proofed and published by
+  the Internet Sacred Text Archive, https://sacred-texts.com (John Bruno Hare), taken from the
+  archive's March 2023 mirror at https://github.com/Neckr0ik/Sacred-Texts.com (MIT licence for
+  the mirror). The archive's notices of attribution are kept on the title pages inside each
+  document.
+  The notices on Books 1 and 4 of the Talmud and on the Zohar read: "This file may be used for
+  any non-commercial purpose, provided this attribution is left intact" (or "redistributed for
+  non-commercial purposes"). These three are therefore NOT covered by Quiet Bible's GPL
+  licence: they may be used and shared for non-commercial purposes only, with the notice left
+  intact (it is kept on their title pages). Quiet Bible is free. Anyone who wants to sell a copy
+  of Quiet Bible must first remove them from web/bible/docs/ in the source (talmud/0.json and
+  3.json, the zohar folder, and their entries in index.json). The other documents
+  from the archive carry no such notice.
+
+Not included
+  The Dead Sea Scrolls, Aryeh Kaplan's Sefer Yetzirah, the Soncino Zohar and Talmud, Shem
+  Tov's Hebrew Matthew, Tyndale's 1525 New Testament, Pliny's letter on the Christians in
+  Betty Radice's translation, and modern books and articles the channel quotes, because they
+  are under copyright or no free copy could be found.

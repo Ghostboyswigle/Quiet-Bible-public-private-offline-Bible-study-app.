@@ -1,0 +1,22 @@
+Quiet Bible - Berean Standard Bible (built in)
+=============================================
+
+The Holy Bible, Berean Standard Bible, BSB is produced in cooperation with Bible Hub, Discovery
+Bible, unfoldingWord, Bible Aquifer, OpenBible.com, and the Berean Bible Translation Committee.
+This text of God's Word has been dedicated to the public domain. Free resources and databases
+are available at BereanBible.com.
+
+What Quiet Bible did with it (translations/tools/build_bsb.py in the source code):
+- The words are those of bsb.txt (https://bereanbible.com/bsb.txt, SHA-256
+  2ac3af1de52d4e68261cba91d85c320b7eadc6560e830d99e591767b8ff5ca96), with runs of spaces made
+  single. No word is changed.
+- Section headings, parallel passages, translator notes, psalm titles, poetry indents and the
+  words of Jesus come from the BSB edition Quiet Bible was first built with
+  (translations/bsb/structure.json); 18 psalm titles that edition did not mark are marked from
+  the text of bsb.txt.
+- The 16 verses the BSB leaves out (Matthew 17:21 and others) are left out; the notes on the
+  verses before them say why.
+- The map (bible-cross-references-notices.txt) shows the same text.
+
+The King James Version, Quiet Bible's main text, is public domain in the United States and most
+of the world; in the United Kingdom the right to print it is reserved to the Crown's patentees.

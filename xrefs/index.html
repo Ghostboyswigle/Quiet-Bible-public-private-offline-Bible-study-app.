@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <title>Bible Cross-References</title>
+    <!--
+      Quiet Bible's frame for Bible Cross-References (Oleksii Trekhleb, MIT licence), opened from
+      the app. Before the map's own code runs, this page:
+      - takes the app's colours from the address (#qbtheme=…), so the map wears the reader's theme;
+      - reads the map's data files through Quiet Bible's asset bridge, as the reader reads the
+        Bible text (with a plain file request as the fallback);
+      - keeps links to websites from navigating away, since the app has no internet access.
+    -->
+    <script>
+      (function () {
+        var root = document.documentElement;
+        function hex(v) {
+          return typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : null;
+        }
+        function mix(a, b, t) {
+          var out = "#";
+          for (var i = 1; i < 7; i += 2) {
+            var x = parseInt(a.substr(i, 2), 16), y = parseInt(b.substr(i, 2), 16);
+            out += ("0" + Math.round(x + (y - x) * t).toString(16)).slice(-2);
+          }
+          return out;
+        }
+        var theme = null;
+        try {
+          var m = /[#&]qbtheme=([^&]*)/.exec(location.hash);
+          if (m) theme = JSON.parse(decodeURIComponent(m[1]));
+        } catch (e) {}
+        if (theme && hex(theme.bg) && hex(theme.fg)) {
+          var bg = hex(theme.bg), fg = hex(theme.fg);
+          var surface = hex(theme.surface) || mix(bg, fg, 0.06);
+          var set = {
+            "--color-background": bg,
+            "--color-surface": surface,
+            "--color-surface-muted": mix(surface, fg, 0.06),
+            "--color-text": fg,
+            "--color-text-muted": hex(theme.muted) || mix(fg, bg, 0.4),
+            "--color-border": hex(theme.divider) || mix(bg, fg, 0.18),
+            "--color-accent": hex(theme.accent) || "#c8a96b",
+            "--color-accent-soft": hex(theme.highlight) || mix(bg, hex(theme.accent) || "#c8a96b", 0.25),
+            "--font-serif": 'Palatino, "Palatino Linotype", "Iowan Old Style", "Book Antiqua", Georgia, serif'
+          };
+          for (var k in set) root.style.setProperty(k, set[k]);
+        }
+        if (location.hash) {
+          try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+        }
+
+        var DATA = /(?:^|\/)data\/((?:translations|cross-references|words)\/[a-z0-9-]+\.json)$/;
+        function bridge() {
+          try {
+            if (window.QuietBibleAssets && typeof window.QuietBibleAssets.read === "function") return window.QuietBibleAssets;
+          } catch (e) {}
+          try {
+            if (window.parent && window.parent.QuietBibleAssets && typeof window.parent.QuietBibleAssets.read === "function") return window.parent.QuietBibleAssets;
+          } catch (e) {}
+          return null;
+        }
+        function json(text) {
+          return new Response(text, { status: 200, headers: { "Content-Type": "application/json" } });
+        }
+        var orig = window.fetch;
+        window.fetch = function (input, init) {
+          var url = typeof input === "string" ? input : input && input.url;
+          var m = url && DATA.exec(String(url).split(/[?#]/)[0]);
+          if (!m) return orig.apply(this, arguments);
+          var A = bridge();
+          if (A) {
+            try {
+              var text = A.read("bible/xrefs/" + m[1]);
+              if (text != null) return Promise.resolve(json(text));
+            } catch (e) {}
+          }
+          return new Promise(function (resolve, reject) {
+            var x = new XMLHttpRequest();
+            x.open("GET", new URL("../bible/xrefs/" + m[1], location.href).href);
+            x.responseType = "text";
+            x.onload = function () {
+              if ((x.status === 200 || x.status === 0) && x.responseText) resolve(json(x.responseText));
+              else resolve(new Response("", { status: x.status || 404 }));
+            };
+            x.onerror = function () { reject(new TypeError("Failed to read " + m[1])); };
+            x.send();
+          });
+        };
+
+        document.addEventListener(
+          "click",
+          function (e) {
+            var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+            if (a && /^(https?:|mailto:)/i.test(a.getAttribute("href") || "")) e.preventDefault();
+          },
+          true
+        );
+      })();
+    </script>
+    <style>
+      html { background: var(--color-background, #141311); }
+      a[href^="http"], a[href^="mailto:"] { color: inherit; text-decoration: none; cursor: default; }
+    </style>
+    <link rel="stylesheet" href="./app.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
