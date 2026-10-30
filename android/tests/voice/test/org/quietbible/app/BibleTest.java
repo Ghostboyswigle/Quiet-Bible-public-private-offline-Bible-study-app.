@@ -137,6 +137,20 @@ public class BibleTest {
             String tid = ok ? id.group(1) : "?";
             String g = ok ? bb.read("translations/" + tid + "/books/GEN.json") : null, mt = ok ? bb.read("translations/" + tid + "/meta.json") : null;
             check("extra translation " + new File(a[i]).getName() + " installs and serves 66 books", ok && g != null && g.length() > 1000 && mt.split("\"id\"").length - 1 == 66, res);
+            if (ok && tid.equals("TWI")) {
+                String tl = bb.translations(), joel = bb.read("translations/TWI/books/JOL.json"), mal = bb.read("translations/TWI/books/MAL.json");
+                check("Asante Twi added and marked Twi (tw), with Biblica's CC BY-SA credit and no Biblica trademark in its name",
+                      tl.contains("{\"id\":\"TWI\",\"name\":\"Asante Twi Bible (2020)\",\"abbr\":\"TWI\",\"lang\":\"tw\",\"license\":\"CC BY-SA 4.0")
+                      && tl.contains("Copyright © 1996, 2020 by Biblica, Inc.") && tl.contains("The original work by Biblica, Inc. is available for free at www.biblica.com and open.bible.")
+                      && !tl.contains("Biblica®"), tl);
+                check("Twi text and book names served, ɛ and ɔ intact", g.contains("Ahyɛaseɛ no Onyankopɔn bɔɔ ɔsoro ne asase.") && mt.contains("\"name\":\"1 Mose\"")
+                      && mt.contains("\"name\":\"Yoɛl\"") && mt.contains("\"name\":\"Adiyisɛm\""), null);
+                check("the verses the eBible corpus lacks are there: Joel 2:28-32, Joel 3:21, Malachi 4",
+                      joel != null && joel.contains("{\"n\":28,\"t\":\"“Na akyire yi, mɛhwie me honhom agu nnipa nyinaa so,") && joel.contains("Na me Awurade, mɛtena Sion!”")
+                      && mal != null && mal.contains("{\"n\":4,\"v\":[{\"n\":1,\"t\":\"“Ampa ara, ɛda no reba;") && mal.contains("mede nnome bɛba abɛsɛe asase no.”"), null);
+                int tv = 0; java.util.regex.Matcher vm = java.util.regex.Pattern.compile("\"verses\":(\\d+)").matcher(mt); while (vm.find()) tv += Integer.parseInt(vm.group(1));
+                check("31,098 verses: every KJV verse but the four the translation joins to the one before", tv == 31098, tv);
+            }
             if (ok) bb.removeTranslation(tid);
         }
         check("the built-in KJV is untouched", bb.read("bible/books/JHN.json").contains("only begotten Son"), null);

@@ -26,8 +26,8 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import manifest  # noqa: E402
 import sign      # noqa: E402
 
-VERSION_CODE = 142
-VERSION_NAME = "1.4.2"
+VERSION_CODE = 143
+VERSION_NAME = "1.4.3"
 TARGET_SDK = 36          # Android 16; Google Play needs this for new apps from 31 Aug 2026
 
 BASE = os.path.join(ROOT, "android/base/QuietBible-v0.6.0.apk")

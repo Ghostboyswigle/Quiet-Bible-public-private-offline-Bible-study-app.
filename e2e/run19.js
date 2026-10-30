@@ -5,7 +5,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const [port, out, metaFile] = process.argv.slice(2);
-// The About line, "Version 1.4.2", from the version in web/app.js.
+// The About line, "Version 1.4.3", from the version in web/app.js.
 const APPJS = fs.readFileSync(require('path').join(__dirname, '..', 'web', 'app.js'), 'utf8');
 const EXPECT_VERSION = `Version ${/var QB_VERSION=`([^`]*)`/.exec(APPJS)[1]}`;
 const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));

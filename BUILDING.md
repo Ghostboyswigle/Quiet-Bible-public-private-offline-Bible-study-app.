@@ -1,6 +1,6 @@
 # Building Quiet Bible
 
-Everything here was last built and tested for **v1.4.2** (version code 142, target SDK 36).
+Everything here was last built and tested for **v1.4.3** (version code 143, target SDK 36).
 
 ## What's where
 
@@ -36,7 +36,7 @@ Needs Python 3 with `cryptography`, a JDK (17 or newer) and `android.jar` for AP
 
 ```sh
 python3 tools/build.py --android-jar /path/to/android-34/android.jar --new-key my-signing-key.p12
-# -> out/QuietBible-v1.4.2.apk, signed with a new key of your own (the first time)
+# -> out/QuietBible-v1.4.3.apk, signed with a new key of your own (the first time)
 python3 tools/build.py --android-jar /path/to/android-34/android.jar --key my-signing-key.p12 --key-password quiet-bible
 # -> later builds: the same key, so each one installs over the last
 ```
@@ -67,7 +67,8 @@ mis-assembles `const/high16`, so write float constants as plain `const` in smali
 5. Page tests: serve `web/` (`python3 -m http.server 8770` inside it), then run
    `node e2e/run21.js 8770 <outdir>` (study tools), `node e2e/run22.js 8770 <outdir>` (study tools
    in other translations), `node e2e/run23.js 8770 <outdir>` (Library > Research), `node e2e/run24.js 8770 <outdir>`
-   (the built-in BSB and the cross-reference map), `node e2e/run19.js 8770 <outdir> <translation-meta.json>` and the older `run*.js`.
+   (the built-in BSB and the cross-reference map), `node e2e/run25.js 8770 <outdir>` (the Asante Twi pack, Twi search,
+   and new chapters opening at their start), `node e2e/run19.js 8770 <outdir> <translation-meta.json>` and the older `run*.js`.
    For a before/after check run `e2e/snap.js` on both builds and compare the shots with
    `e2e/cmpshots.py`. Some of these scripts point at a scratch folder for unpacked
    translation packs; change `S` at the top.
@@ -81,7 +82,12 @@ source is behind. The additions are plain functions named `qb…`/`Qb…` (searc
 
 - `qbTr`, `qbTrInfo`, `qbTrList`, `qbSwitch`, `qbPath`: translations
 - `qbDir`: right-to-left layout
-- `qbFold`, `qbAr`, `qbArFold`, `qbDigits`, `qbBookKey`, `qbMetaBook`: search and references
+- `qbFold`, `qbAr`, `qbArFold`, `qbDigits`, `qbBookKey`, `qbMetaBook`: search and references.
+  Words typed without accents match accented text; ɛ and ɔ (Twi) match a typed e and o, and the
+  Twi apostrophe ʼ a typed '. The bundle's `Tr` (search words) keeps ɛ, ɔ and ʼ as letters.
+- `qbLangName`: a language's English name (Twi for `tw`, which the browser would call Akan)
+- The reader's scroll box is marked `data-qb-reader-scroll`; a new chapter opens at its start
+  unless a verse was asked for or the app is returning to the reading place
 - `QbTranslations`, `QbVoice`, `QbCredits`: Settings
 - `QbStudy` and the rest between `/*QB-STUDY-BEGIN*/` and `/*QB-STUDY-END*/`: the study tools,
   the Research tab and the cross-reference map's host (`QbMapHost`, `QbMapButton`, `qbOpenMap`).
@@ -122,7 +128,10 @@ builder):
 - github.com/BibleCorps/FRA-B-LSG1910-PD-UBS
 - github.com/STEPBible/STEPBible-Data (Arabic)
 - github.com/scrollmapper/bible_databases (Portuguese, Russian)
-- the BibleNLP eBible corpus, for the Vietnamese capitals repair
+- the BibleNLP eBible corpus (github.com/BibleNLP/ebible), for the Vietnamese capitals repair and
+  the Asante Twi text
+- github.com/Beblia/Holy-Bible-XML-Format, for the 136 Asante Twi verses the eBible corpus has
+  no line for (see `build_twi.py`)
 
 **Voices** (`.qbvoice`) come in two formats.
 
@@ -257,7 +266,9 @@ licences; `android/extra/assets/licenses/` holds the notices.
 
 The Bible texts, study data and research documents are not code and keep their own terms
 (public domain, CC BY, CC BY-SA, GPL for the KJV word data), listed in those notices and in
-`study/SOURCES.md`.
+`study/SOURCES.md`. The Asante Twi pack is Biblica's CC BY-SA 4.0 text, changed (verse text
+only, English numbering), so it carries Biblica's credit and the changes in its licence and
+source lines and leaves the Biblica® trademark out of its name, as Biblica asks.
 
 **Non-commercial exception.** Three research books, Books 1 and 4 of Rodkinson's Talmud
 (`web/bible/docs/talmud/0.json`, `3.json`) and de Manhar's Zohar (`web/bible/docs/zohar/`), come
@@ -290,4 +301,6 @@ maven.google.com. Neither was reachable from the machine these builds were made 
 ## Known limits
 
 - Natural voices need a 64-bit phone (arm64-v8a). 32-bit phones read with the phone's own voice.
+- There is no Twi voice. Phones' own text-to-speech has no Twi either, so the Asante Twi Bible is
+  read in whatever language the phone's voice is set to.
 - Tested on one real phone so far, not on a range of them.

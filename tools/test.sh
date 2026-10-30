@@ -39,4 +39,4 @@ TR=$PACKS/translations
 r BibleTest $J org.quietbible.app.BibleTest "$APK" "$W/f3" "$TR/QuietBible-KJV.qbbible" "$TR/QuietBible-RV1909.qbbible" \
    "$TR/QuietBible-CUV.qbbible" "$TR/QuietBible-CUVS.qbbible" "$TR/QuietBible-ADB.qbbible" \
    "$TR/QuietBible-VIE1934.qbbible" "$TR/QuietBible-LSG.qbbible" "$TR/QuietBible-SVD.qbbible" \
-   "$TR/QuietBible-BLIVRE.qbbible" "$TR/QuietBible-RST.qbbible"
+   "$TR/QuietBible-BLIVRE.qbbible" "$TR/QuietBible-RST.qbbible" "$TR/QuietBible-TWI.qbbible"

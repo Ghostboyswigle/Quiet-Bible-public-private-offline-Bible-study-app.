@@ -1,11 +1,16 @@
-QUIET BIBLE v1.4.2
+QUIET BIBLE v1.4.3
 ==================
 
 A private, offline Bible reader for Android that reads aloud. No account, no ads, no tracking,
 and no internet permission. Needs Android 8 or later. The app is about 74 MB.
 
+New in 1.4.3: the Asante Twi Bible (Translations/QuietBible-TWI.qbbible). Search finds Twi
+words whether or not you type ɛ and ɔ ("Onyankopon" finds Onyankopɔn), and references work
+with Twi book names (Yohane 3:16, Yoɛl 2:28, or Yoel 2:28). Also fixed: choosing another
+chapter could open it part-way down, so Play started in the middle; it now opens at verse 1.
+
 1. Install the app
-   Open QuietBible-v1.4.2.apk on your phone and install it (you may need to allow installs
+   Open QuietBible-v1.4.3.apk on your phone and install it (you may need to allow installs
    from your browser or file manager). It installs over any earlier official Quiet Bible and
    keeps your notes. Built in: the King James Version (the main text), the Berean Standard
    Bible, and the English voice "John".
@@ -21,6 +26,7 @@ and no internet permission. Needs Android 8 or later. The app is about 74 MB.
      QuietBible-SVD.qbbible       Arabic      Smith & Van Dyck (reads right to left)
      QuietBible-BLIVRE.qbbible    Portuguese  Biblia Livre (Almeida)
      QuietBible-RST.qbbible       Russian     Synodal
+     QuietBible-TWI.qbbible       Twi         Asante Twi Bible (2020), Biblica's text
 
 3. Add voices if you want them (Settings > Voice > "Add a voice from a file")
    Voices/English
@@ -31,7 +37,8 @@ and no internet permission. Needs Android 8 or later. The app is about 74 MB.
        language a female and a male voice:
          Spanish Lucia, Mateo     French Claire, Louis     Portuguese Ana, Joao
          Russian Anna, Ivan       Vietnamese Lan, Minh     Arabic Nour, Omar
-   Chinese and Tagalog are read by the phone's own voice.
+   Chinese and Tagalog are read by the phone's own voice. There is no Twi voice, and phones'
+   own voices don't speak Twi, so reading the Twi Bible aloud won't sound right.
    Voice samples/ has a short recording of each voice.
 
 4. Things to try
@@ -48,3 +55,8 @@ and no internet permission. Needs Android 8 or later. The app is about 74 MB.
    voices are under the OpenRAIL-M licence (inside the voice files and shown in the app):
    anyone may use and share them, but not for the harmful uses it lists. Every credit and
    licence is in the app: Settings > About > Credits and licences.
+   The Asante Twi Bible is Copyright © 1996, 2020 by Biblica, Inc., under the Creative Commons
+   Attribution-ShareAlike 4.0 licence (creativecommons.org/licenses/by-sa/4.0). The original
+   work by Biblica, Inc. is available for free at www.biblica.com and open.bible. Quiet Bible's
+   copy is changed (verse text only, with English verse numbers) and shared under the same
+   licence.

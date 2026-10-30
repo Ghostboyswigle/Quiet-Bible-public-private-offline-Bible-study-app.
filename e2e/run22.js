@@ -16,6 +16,7 @@ const TR = [
   { id: 'BLIVRE', name: 'Bíblia Livre (Almeida)', lang: 'pt', pack: 'blvpack', q: 'meu pastor' },
   { id: 'RST', name: 'Синодальный перевод', lang: 'ru', pack: 'rstpack', q: 'Пастырь' },
   { id: 'SVD', name: 'Smith & Van Dyck (Arabic)', lang: 'ar', pack: 'svdpack', q: 'الرب راعي' },
+  { id: 'TWI', name: 'Asante Twi Bible (2020)', lang: 'tw', pack: 'twipack', q: 'Awurade ne me hwɛfo' },
 ].filter(t => t.builtIn || fs.existsSync(S + t.pack + '/meta.json'));
 const RUN = TR.filter(t => !only.length || only.includes(t.id));
 
